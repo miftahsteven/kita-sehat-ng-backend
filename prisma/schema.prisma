@@ -1,0 +1,270 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BannerPlacement {
+  HEADER_TOP
+  BELOW_HERO
+  SIDEBAR
+  ARTICLE_MIDDLE
+  ARTICLE_BOTTOM
+  MOBILE_STICKY
+}
+
+enum AdminRoleName {
+  SUPER_ADMIN
+  EDITOR
+  AUTHOR
+  VIEWER
+}
+
+model AdminUser {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  avatarUrl    String?
+  role         AdminRoleName @default(AUTHOR)
+  isActive     Boolean       @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  auditLogs    AuditLog[]
+
+  @@map("admin_users")
+}
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  adminUserId String?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  action      String
+  entity      String
+  entityId    String?
+  description String?
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([adminUserId])
+  @@index([entity])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Author {
+  id           String       @id @default(cuid())
+  name         String
+  slug         String       @unique
+  email        String       @unique
+  passwordHash String?      // Optional for now, required if they can login
+  avatarUrl    String?
+  bio          String?
+  role         String       @default("Health Writer")
+  isActive     Boolean      @default(true)
+  lastLoginAt  DateTime?
+  articles     Article[]
+  socialLinks  SocialLink[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@map("authors")
+}
+
+model SocialLink {
+  id       String @id @default(cuid())
+  authorId String
+  author   Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  platform String // e.g., 'instagram', 'linkedin', 'twitter'
+  url      String
+
+  @@map("author_social_links")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  color       String?
+  order       Int       @default(0)
+  isActive    Boolean   @default(true)
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("categories")
+}
+
+model Article {
+  id             String        @id @default(cuid())
+  title          String
+  slug           String        @unique
+  excerpt        String
+  content        String
+  coverImage     String?
+  coverImageAlt  String?
+  status         ArticleStatus @default(DRAFT)
+  readingTime    Int           @default(3)
+  isFeatured     Boolean       @default(false)
+  isHero         Boolean       @default(false)
+  isPopular      Boolean       @default(false)
+  isEditorPick   Boolean       @default(false)
+  viewCount      Int           @default(0)
+  publishedAt    DateTime?
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String?
+  categoryId     String
+  authorId       String
+
+  category       Category      @relation(fields: [categoryId], references: [id])
+  author         Author        @relation(fields: [authorId], references: [id])
+  tags           ArticleTag[]
+  mediaAssets    MediaAsset[]
+
+  // Administrative fields
+  createdByAdminId String?
+  updatedByAdminId String?
+  reviewedBy       String?
+  reviewedAt       DateTime?
+  scheduledAt      DateTime?
+  allowIndexing    Boolean   @default(true)
+  canonicalUrl     String?
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([isFeatured])
+  @@index([isHero])
+  @@index([isPopular])
+  @@index([isEditorPick])
+  @@map("articles")
+}
+
+model Tag {
+  id        String       @id @default(cuid())
+  name      String
+  slug      String       @unique
+  articles  ArticleTag[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("tags")
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+  @@map("article_tags")
+}
+
+model MediaAsset {
+  id         String   @id @default(cuid())
+  articleId  String?
+  article    Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  url        String
+  altText    String?
+  caption    String?
+  type       String   @default("image")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("media_assets")
+}
+
+model AdvertisementBanner {
+  id              String          @id @default(cuid())
+  name            String
+  placement       BannerPlacement
+  imageUrlDesktop String          // For desktop resolution
+  imageUrlMobile  String?         // For mobile resolution
+  targetUrl       String?
+  title           String?
+  description     String?
+  isActive        Boolean         @default(true)
+  order           Int             @default(0)
+  startDate       DateTime?
+  endDate         DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([placement])
+  @@index([isActive])
+  @@index([order])
+  @@map("advertisement_banners")
+}
+
+model StaticPage {
+  id             String   @id @default(cuid())
+  title          String
+  slug           String   @unique
+  content        String
+  seoTitle       String?
+  seoDescription String?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("static_pages")
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  group     String   @default("general")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model MenuItem {
+  id        String     @id @default(cuid())
+  label     String
+  url       String
+  order     Int        @default(0)
+  type      String     @default("HEADER") // HEADER, FOOTER
+  parentId  String?
+  parent    MenuItem?  @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children  MenuItem[] @relation("MenuHierarchy")
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("menu_items")
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  source    String   @default("public_site")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("newsletter_subscribers")
+}
