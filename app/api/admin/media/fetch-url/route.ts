@@ -18,10 +18,19 @@ export async function POST(request: Request) {
     }
 
     console.log(`FETCHING IMAGE FROM: ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`Failed to fetch image: ${response.statusText}`);
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      }
+    });
+    
+    if (!response.ok) {
+      console.error(`FETCH ERROR: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+    }
 
     const contentType = response.headers.get("content-type");
+    console.log(`CONTENT TYPE: ${contentType}`);
     const extension = contentType?.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
     
     const bytes = await response.arrayBuffer();
