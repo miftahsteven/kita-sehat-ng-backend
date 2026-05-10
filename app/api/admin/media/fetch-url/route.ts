@@ -50,28 +50,26 @@ export async function POST(request: Request) {
     const fileName = `${uuidv4()}.${extension}`;
     const relativePath = `/uploads/${fileName}`;
     
-    // Gunakan path.resolve untuk mendapatkan jalur absolut yang lebih pasti
+    // Gunakan path absolut yang lebih aman
     const rootDir = process.cwd();
+    // Jika di server Anda lokasinya selalu di /var/www/kitasehat-ng/backend, kita bisa pastikan di sini
     const uploadDir = join(rootDir, "public", "uploads");
     const path = join(uploadDir, fileName);
 
-    console.log(`[DEBUG] ROOT DIR: ${rootDir}`);
-    console.log(`[DEBUG] ATTEMPTING TO SAVE TO: ${path}`);
+    console.log(`[DEBUG] FINAL PATH: ${path}`);
 
     // Ensure directory exists
     if (!existsSync(uploadDir)) {
-      console.log(`[DEBUG] CREATING DIRECTORY: ${uploadDir}`);
       await mkdir(uploadDir, { recursive: true });
     }
 
     await writeFile(path, buffer);
     
-    // Verifikasi apakah file benar-benar ada setelah ditulis
+    // Verifikasi penulisan
     if (existsSync(path)) {
-      const stats = await import("fs").then(fs => fs.statSync(path));
-      console.log(`[DEBUG] SAVE SUCCESSFUL. File size on disk: ${stats.size} bytes`);
+      console.log(`[DEBUG] SUCCESS: File saved. Size: ${buffer.length} bytes`);
     } else {
-      console.error(`[DEBUG] SAVE FAILED. File not found on disk after writing.`);
+      throw new Error(`Failed to verify file at ${path}`);
     }
 
     const asset = await prisma.mediaAsset.create({
