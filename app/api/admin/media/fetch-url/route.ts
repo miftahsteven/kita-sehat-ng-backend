@@ -31,10 +31,13 @@ export async function POST(request: Request) {
       throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
     }
 
-    const contentType = response.headers.get("content-type");
+    const contentType = response.headers.get("content-type") || "";
     console.log(`[DEBUG] CONTENT TYPE: ${contentType}`);
     
-    const extension = contentType?.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
+    let extension = "jpg";
+    if (contentType.includes("png")) extension = "png";
+    else if (contentType.includes("webp")) extension = "webp";
+    else if (contentType.includes("gif")) extension = "gif";
     
     const bytes = await response.arrayBuffer();
     const buffer = Buffer.from(bytes);
