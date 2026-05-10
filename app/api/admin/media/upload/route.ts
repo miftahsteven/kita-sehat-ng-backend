@@ -25,8 +25,11 @@ export async function POST(request: Request) {
     const fileName = `${uuidv4()}.${fileExtension}`;
     const relativePath = `/uploads/${fileName}`;
     
-    const rootDir = process.cwd();
-    const uploadDir = join(rootDir, "public", "uploads");
+    const isLinux = process.platform === "linux";
+    const uploadDir = isLinux 
+      ? "/var/www/kita-sehat-storage/uploads" 
+      : join(process.cwd(), "public", "uploads");
+    
     const path = join(uploadDir, fileName);
 
     // Ensure directory exists
