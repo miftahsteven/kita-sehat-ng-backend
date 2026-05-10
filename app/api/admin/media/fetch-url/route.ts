@@ -49,9 +49,13 @@ export async function POST(request: Request) {
 
     const fileName = `${uuidv4()}.${extension}`;
     const relativePath = `/uploads/${fileName}`;
-    const uploadDir = join(process.cwd(), "public", "uploads");
+    
+    // Gunakan path.resolve untuk mendapatkan jalur absolut yang lebih pasti
+    const rootDir = process.cwd();
+    const uploadDir = join(rootDir, "public", "uploads");
     const path = join(uploadDir, fileName);
 
+    console.log(`[DEBUG] ROOT DIR: ${rootDir}`);
     console.log(`[DEBUG] ATTEMPTING TO SAVE TO: ${path}`);
 
     // Ensure directory exists
@@ -61,7 +65,14 @@ export async function POST(request: Request) {
     }
 
     await writeFile(path, buffer);
-    console.log(`[DEBUG] SAVE SUCCESSFUL`);
+    
+    // Verifikasi apakah file benar-benar ada setelah ditulis
+    if (existsSync(path)) {
+      const stats = await import("fs").then(fs => fs.statSync(path));
+      console.log(`[DEBUG] SAVE SUCCESSFUL. File size on disk: ${stats.size} bytes`);
+    } else {
+      console.error(`[DEBUG] SAVE FAILED. File not found on disk after writing.`);
+    }
 
     const asset = await prisma.mediaAsset.create({
       data: {

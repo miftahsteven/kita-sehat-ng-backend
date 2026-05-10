@@ -24,7 +24,9 @@ export async function POST(request: Request) {
     const fileExtension = file.name.split(".").pop()?.toLowerCase().replace("jpeg", "jpg") || "jpg";
     const fileName = `${uuidv4()}.${fileExtension}`;
     const relativePath = `/uploads/${fileName}`;
-    const uploadDir = join(process.cwd(), "public", "uploads");
+    
+    const rootDir = process.cwd();
+    const uploadDir = join(rootDir, "public", "uploads");
     const path = join(uploadDir, fileName);
 
     // Ensure directory exists
