@@ -11,15 +11,24 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const { page, limit, skip, take } = getPagination(searchParams);
+    const search = searchParams.get("search") || "";
+
+    const where = search ? {
+      OR: [
+        { title: { contains: search, mode: 'insensitive' as any } },
+        { excerpt: { contains: search, mode: 'insensitive' as any } },
+      ]
+    } : {};
 
     const [articles, total] = await Promise.all([
       prisma.article.findMany({
+        where,
         skip,
         take,
         orderBy: { createdAt: "desc" },
         include: { category: true, author: true },
       }),
-      prisma.article.count(),
+      prisma.article.count({ where }),
     ]);
 
     return successResponse(
