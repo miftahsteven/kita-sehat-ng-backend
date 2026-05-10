@@ -50,13 +50,15 @@ export async function POST(request: Request) {
     const fileName = `${uuidv4()}.${extension}`;
     const relativePath = `/uploads/${fileName}`;
     
-    // Gunakan path absolut yang lebih aman
-    const rootDir = process.cwd();
-    // Jika di server Anda lokasinya selalu di /var/www/kitasehat-ng/backend, kita bisa pastikan di sini
-    const uploadDir = join(rootDir, "public", "uploads");
+    // ULTIMATE SOLUTION: Gunakan path absolut yang sudah dipastikan ada di server
+    const isLinux = process.platform === "linux";
+    const uploadDir = isLinux 
+      ? "/var/www/kita-sehat-storage/uploads" 
+      : join(process.cwd(), "public", "uploads");
+    
     const path = join(uploadDir, fileName);
 
-    console.log(`[DEBUG] FINAL PATH: ${path}`);
+    console.log(`[ULTIMATE DEBUG] SAVING TO: ${path}`);
 
     // Ensure directory exists
     if (!existsSync(uploadDir)) {
@@ -65,11 +67,10 @@ export async function POST(request: Request) {
 
     await writeFile(path, buffer);
     
-    // Verifikasi penulisan
     if (existsSync(path)) {
-      console.log(`[DEBUG] SUCCESS: File saved. Size: ${buffer.length} bytes`);
+      console.log(`[ULTIMATE DEBUG] SUCCESS: File verified at ${path}`);
     } else {
-      throw new Error(`Failed to verify file at ${path}`);
+      throw new Error(`File verification failed at ${path}`);
     }
 
     const asset = await prisma.mediaAsset.create({
