@@ -17,38 +17,48 @@ export async function POST(request: Request) {
       return errorResponse("URL is required", 400);
     }
 
-    console.log(`FETCHING IMAGE FROM: ${url}`);
+    console.log(`[DEBUG] RECEIVED URL: ${url}`);
+    
     const response = await fetch(url, {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
       }
     });
     
+    console.log(`[DEBUG] FETCH STATUS: ${response.status} ${response.statusText}`);
+    
     if (!response.ok) {
-      console.error(`FETCH ERROR: ${response.status} ${response.statusText}`);
       throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
     }
 
     const contentType = response.headers.get("content-type");
-    console.log(`CONTENT TYPE: ${contentType}`);
+    console.log(`[DEBUG] CONTENT TYPE: ${contentType}`);
+    
     const extension = contentType?.split("/")[1]?.replace("jpeg", "jpg") || "jpg";
     
     const bytes = await response.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    console.log(`[DEBUG] DOWNLOADED SIZE: ${buffer.length} bytes`);
+
+    if (buffer.length === 0) {
+      throw new Error("Downloaded buffer is empty");
+    }
 
     const fileName = `${uuidv4()}.${extension}`;
     const relativePath = `/uploads/${fileName}`;
     const uploadDir = join(process.cwd(), "public", "uploads");
     const path = join(uploadDir, fileName);
 
-    console.log(`SAVING TO: ${path}`);
+    console.log(`[DEBUG] ATTEMPTING TO SAVE TO: ${path}`);
 
     // Ensure directory exists
     if (!existsSync(uploadDir)) {
+      console.log(`[DEBUG] CREATING DIRECTORY: ${uploadDir}`);
       await mkdir(uploadDir, { recursive: true });
     }
 
     await writeFile(path, buffer);
+    console.log(`[DEBUG] SAVE SUCCESSFUL`);
 
     const asset = await prisma.mediaAsset.create({
       data: {
@@ -60,7 +70,7 @@ export async function POST(request: Request) {
 
     return successResponse(asset, "Image fetched and saved successfully");
   } catch (error: any) {
-    console.error("FETCH URL ERROR:", error);
+    console.error("[DEBUG] FETCH URL ERROR:", error);
     return errorResponse(error.message || "Failed to fetch image from URL", 500);
   }
 }
