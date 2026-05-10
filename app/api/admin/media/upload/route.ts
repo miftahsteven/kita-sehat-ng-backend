@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { errorResponse, successResponse } from "@/lib/api-response";
 import { authorizeAdmin, unauthorized } from "@/lib/admin-auth";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { v4 as uuidv4 } from "uuid";
+import { existsSync } from "fs";
 
 export async function POST(request: Request) {
   const admin = await authorizeAdmin(request);
@@ -20,10 +21,16 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const fileExtension = file.name.split(".").pop();
+    const fileExtension = file.name.split(".").pop()?.toLowerCase().replace("jpeg", "jpg") || "jpg";
     const fileName = `${uuidv4()}.${fileExtension}`;
     const relativePath = `/uploads/${fileName}`;
-    const path = join(process.cwd(), "public", "uploads", fileName);
+    const uploadDir = join(process.cwd(), "public", "uploads");
+    const path = join(uploadDir, fileName);
+
+    // Ensure directory exists
+    if (!existsSync(uploadDir)) {
+      await mkdir(uploadDir, { recursive: true });
+    }
 
     await writeFile(path, buffer);
 
