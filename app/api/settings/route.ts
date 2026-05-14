@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { errorResponse, successResponse } from "@/lib/api-response";
+import { authorizeAdmin, unauthorized } from "@/lib/admin-auth";
 
 export async function GET() {
   try {
@@ -18,6 +19,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const admin = await authorizeAdmin(req);
+    if (!admin) {
+      return unauthorized();
+    }
+
     const body = await req.json();
     const { settings } = body; // Expected format: { settings: { key1: value1, key2: value2 } }
 
