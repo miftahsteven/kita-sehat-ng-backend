@@ -51,10 +51,7 @@ export async function POST(request: Request) {
     const relativePath = `/uploads/${fileName}`;
     
     // ULTIMATE SOLUTION: Gunakan path absolut yang sudah dipastikan ada di server
-    const isLinux = process.platform === "linux";
-    const uploadDir = isLinux 
-      ? "/var/www/kita-sehat-storage/uploads" 
-      : join(process.cwd(), "public", "uploads");
+    const uploadDir = join(process.cwd(), "public", "uploads");
     
     const path = join(uploadDir, fileName);
 
