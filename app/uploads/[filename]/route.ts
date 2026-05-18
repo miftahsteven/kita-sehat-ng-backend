@@ -5,7 +5,7 @@ import { existsSync } from "fs";
 
 export async function GET(
   request: Request,
-  { params }: { params: { filename: string } }
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   // Resolve params
   const resolvedParams = await params;
