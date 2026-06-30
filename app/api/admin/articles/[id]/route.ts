@@ -41,6 +41,18 @@ export async function PUT(
       seoTitle, seoDescription, seoKeywords, slug 
     } = body;
 
+    const existing = await prisma.article.findUnique({ where: { id } });
+    if (!existing) return errorResponse("Article not found", 404);
+
+    let publishedAtVal = existing.publishedAt;
+    if (status === "PUBLISHED") {
+      if (!publishedAtVal) {
+        publishedAtVal = new Date();
+      }
+    } else {
+      publishedAtVal = null;
+    }
+
     const article = await prisma.article.update({
       where: { id },
       data: {
@@ -59,7 +71,7 @@ export async function PUT(
         seoDescription,
         seoKeywords,
         updatedByAdminId: (admin as any).id,
-        publishedAt: status === "PUBLISHED" ? new Date() : undefined,
+        publishedAt: publishedAtVal,
       },
     });
 

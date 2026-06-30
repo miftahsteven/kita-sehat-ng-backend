@@ -69,6 +69,7 @@ export async function POST(request: Request) {
         seoTitle,
         seoDescription,
         seoKeywords,
+        publishedAt: status === "PUBLISHED" ? new Date() : null,
         createdByAdminId: (admin as any).id,
       },
     });
