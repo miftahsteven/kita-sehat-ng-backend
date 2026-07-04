@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     const { 
       title, excerpt, content, coverImage, status, 
       categoryId, authorId, isFeatured, isHero, isEditorPick,
-      seoTitle, seoDescription, seoKeywords 
+      seoTitle, seoDescription, seoKeywords, feedbackFormEnabled
     } = body;
 
     const article = await prisma.article.create({
@@ -61,11 +61,12 @@ export async function POST(request: Request) {
         content,
         coverImage,
         status,
-        categoryId,
-        authorId,
+        category: { connect: { id: categoryId } },
+        author: { connect: { id: authorId } },
         isFeatured: isFeatured || false,
         isHero: isHero || false,
         isEditorPick: isEditorPick || false,
+        feedbackFormEnabled: feedbackFormEnabled || false,
         seoTitle,
         seoDescription,
         seoKeywords,

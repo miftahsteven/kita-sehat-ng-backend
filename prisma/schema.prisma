@@ -134,6 +134,7 @@ model Article {
   author         Author        @relation(fields: [authorId], references: [id])
   tags           ArticleTag[]
   mediaAssets    MediaAsset[]
+  feedbacks      Feedback[]
 
   // Administrative fields
   createdByAdminId String?
@@ -143,6 +144,7 @@ model Article {
   scheduledAt      DateTime?
   allowIndexing    Boolean   @default(true)
   canonicalUrl     String?
+  feedbackFormEnabled Boolean @default(false)
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -267,4 +269,20 @@ model NewsletterSubscriber {
   updatedAt DateTime @updatedAt
 
   @@map("newsletter_subscribers")
+}
+
+model Feedback {
+  id               String   @id @default(cuid())
+  articleId        String
+  article          Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  name             String
+  phone            String
+  categories       String[]
+  otherCategory    String?
+  verificationCode String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([verificationCode])
+  @@map("feedbacks")
 }

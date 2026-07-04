@@ -38,7 +38,7 @@ export async function PUT(
     const { 
       title, excerpt, content, coverImage, status, 
       categoryId, authorId, isFeatured, isHero, isEditorPick,
-      seoTitle, seoDescription, seoKeywords, slug 
+      seoTitle, seoDescription, seoKeywords, slug, feedbackFormEnabled 
     } = body;
 
     const existing = await prisma.article.findUnique({ where: { id } });
@@ -62,11 +62,12 @@ export async function PUT(
         content,
         coverImage,
         status,
-        categoryId,
-        authorId,
+        category: categoryId ? { connect: { id: categoryId } } : undefined,
+        author: authorId ? { connect: { id: authorId } } : undefined,
         isFeatured,
         isHero,
         isEditorPick,
+        feedbackFormEnabled,
         seoTitle,
         seoDescription,
         seoKeywords,
