@@ -25,7 +25,10 @@ export async function GET(request: Request) {
         where,
         skip,
         take,
-        orderBy: { createdAt: "desc" },
+        orderBy: [
+          { publishedAt: { sort: "desc", nulls: "first" } },
+          { createdAt: "desc" }
+        ],
         include: { category: true, author: true },
       }),
       prisma.article.count({ where }),
