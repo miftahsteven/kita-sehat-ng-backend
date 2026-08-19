@@ -346,6 +346,10 @@ async function main() {
       { key: "accent_color", value: "#2596be", group: "brand" },
       { key: "meta_description", value: "Platform informasi kesehatan keluarga, tips kesehatan, dan panduan gaya hidup sehat.", group: "seo" },
       { key: "contact_email", value: "redaksi@kita-sehat.id", group: "contact" },
+      { key: "BANNER_HEADER_ENABLED", value: "true", group: "banners" },
+      { key: "BANNER_MIDDLE_ENABLED", value: "true", group: "banners" },
+      { key: "BANNER_SUB_TOPIC_ENABLED", value: "true", group: "banners" },
+      { key: "BANNER_MINI_ADS_ENABLED", value: "true", group: "banners" },
     ],
   });
 
