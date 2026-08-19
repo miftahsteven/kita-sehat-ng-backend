@@ -7,7 +7,12 @@ export async function GET(request: Request) {
     const settings = await prisma.siteSetting.findMany({
       where: {
         key: {
-          in: ["BANNER_HEADER_ENABLED", "BANNER_MIDDLE_ENABLED"]
+          in: [
+            "BANNER_HEADER_ENABLED", 
+            "BANNER_MIDDLE_ENABLED",
+            "BANNER_SUB_TOPIC_ENABLED",
+            "BANNER_MINI_ADS_ENABLED"
+          ]
         }
       }
     });
@@ -16,6 +21,8 @@ export async function GET(request: Request) {
     const result = {
       BANNER_HEADER_ENABLED: settings.find(s => s.key === "BANNER_HEADER_ENABLED")?.value === "true",
       BANNER_MIDDLE_ENABLED: settings.find(s => s.key === "BANNER_MIDDLE_ENABLED")?.value === "true",
+      BANNER_SUB_TOPIC_ENABLED: settings.find(s => s.key === "BANNER_SUB_TOPIC_ENABLED")?.value === "true",
+      BANNER_MINI_ADS_ENABLED: settings.find(s => s.key === "BANNER_MINI_ADS_ENABLED")?.value === "true",
     };
 
     return successResponse(result);
@@ -33,7 +40,14 @@ export async function POST(request: Request) {
     const body = await request.json(); // { key: string, value: boolean }
     const { key, value } = body;
 
-    if (!["BANNER_HEADER_ENABLED", "BANNER_MIDDLE_ENABLED"].includes(key)) {
+    const allowedKeys = [
+      "BANNER_HEADER_ENABLED", 
+      "BANNER_MIDDLE_ENABLED",
+      "BANNER_SUB_TOPIC_ENABLED",
+      "BANNER_MINI_ADS_ENABLED"
+    ];
+
+    if (!allowedKeys.includes(key)) {
       return errorResponse("Invalid setting key", 400);
     }
 

@@ -1,12 +1,11 @@
-// Version 2 - Refreshing for Menu Management
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+// Always create updated instance when reloading in dev
 export const prisma =
-  globalForPrisma.prisma ??
   new PrismaClient({
     log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
   });

@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { errorResponse, successResponse } from "@/lib/api-response";
 import { authorizeAdmin, unauthorized } from "@/lib/admin-auth";
 
+
 export async function GET(request: Request) {
   try {
     const banners = await prisma.advertisementBanner.findMany({
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
     return successResponse(banners);
   } catch (error) {
     console.error("DEBUG BANNERS ERROR:", error);
-    return errorResponse("Failed to fetch banners", 500, error);
+    return errorResponse(error instanceof Error ? error.message : "Failed to fetch banners", 500, error);
   }
 }
 

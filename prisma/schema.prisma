@@ -20,6 +20,8 @@ enum BannerPlacement {
   ARTICLE_MIDDLE
   ARTICLE_BOTTOM
   MOBILE_STICKY
+  SUB_TOPIC
+  MINI_ADS
 }
 
 enum AdminRoleName {

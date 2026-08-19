@@ -271,6 +271,26 @@ async function main() {
         description: "Slot iklan sticky mobile.",
         isActive: true,
       },
+      {
+        name: "Category Sub Topic Banner",
+        placement: BannerPlacement.SUB_TOPIC,
+        imageUrlDesktop: "https://placehold.co/1200x240/0098b0/ffffff?text=Sub+Topic+Banner",
+        imageUrlMobile: "https://placehold.co/600x300/0098b0/ffffff?text=Sub+Topic+Banner",
+        targetUrl: "https://kita-sehat.id",
+        title: "Sub Topic Banner",
+        description: "Banner bagian atas halaman sub topik/kategori.",
+        isActive: true,
+      },
+      {
+        name: "Category Mini Ads",
+        placement: BannerPlacement.MINI_ADS,
+        imageUrlDesktop: "https://placehold.co/400x240/103174/ffffff?text=Mini+Ads",
+        imageUrlMobile: "https://placehold.co/400x240/103174/ffffff?text=Mini+Ads",
+        targetUrl: "https://kita-sehat.id",
+        title: "Mini Ads",
+        description: "Slot mini ads di atas artikel populer kategori.",
+        isActive: true,
+      },
     ],
   });
 
